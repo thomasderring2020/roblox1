@@ -409,124 +409,204 @@ function Onboarding({ onComplete }) {
 function TournamentCard({ tournament, isSaved, onSave, onDismiss, onTap }) {
   const [offset, setOffset] = useState(0);
   const [swiping, setSwiping] = useState(null);
+  const [released, setReleased] = useState(true);
   const startX = useRef(0);
-  const isDragging = useRef(false);
+  const dragged = useRef(false);
+  const cardRef = useRef(null);
+
+  const imageUrl = `https://picsum.photos/seed/golf${tournament.id}/800/500`;
 
   const handlePointerDown = (e) => {
+    cardRef.current?.setPointerCapture(e.pointerId);
     startX.current = e.clientX;
-    isDragging.current = true;
+    dragged.current = false;
+    setReleased(false);
   };
 
   const handlePointerMove = (e) => {
-    if (!isDragging.current) return;
     const dx = e.clientX - startX.current;
+    if (Math.abs(dx) > 6) dragged.current = true;
     setOffset(dx);
     setSwiping(dx > 40 ? "save" : dx < -40 ? "dismiss" : null);
   };
 
   const handlePointerUp = () => {
-    if (!isDragging.current) return;
-    isDragging.current = false;
+    setReleased(true);
     if (offset > 100) {
-      setOffset(400);
-      setTimeout(() => { onSave(tournament.id); setOffset(0); setSwiping(null); }, 250);
+      setOffset(600);
+      setTimeout(() => { onSave(tournament.id); setOffset(0); setSwiping(null); }, 220);
     } else if (offset < -100) {
-      setOffset(-400);
-      setTimeout(() => { onDismiss(tournament.id); setOffset(0); setSwiping(null); }, 250);
+      setOffset(-600);
+      setTimeout(() => { onDismiss(tournament.id); setOffset(0); setSwiping(null); }, 220);
     } else {
       setOffset(0);
       setSwiping(null);
+      if (!dragged.current) onTap(tournament);
     }
   };
 
+  const rotation = offset * 0.05;
+
   return (
     <div
+      ref={cardRef}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerUp}
-      onClick={() => !isDragging.current && Math.abs(offset) < 5 && onTap(tournament)}
       style={{
+        position: "absolute", inset: 0,
         background: T.white,
-        borderRadius: 16,
-        padding: 20,
-        marginBottom: 12,
-        cursor: "pointer",
-        transform: `translateX(${offset}px)`,
-        transition: isDragging.current ? "none" : "transform 0.3s ease",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-        userSelect: "none",
+        borderRadius: 20,
         overflow: "hidden",
+        cursor: "grab",
+        transform: `translateX(${offset}px) rotate(${rotation}deg)`,
+        transition: released ? "transform 0.25s ease" : "none",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.14)",
+        userSelect: "none",
+        touchAction: "none",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
-        <div style={{ flex: 1 }}>
-          <h3 style={{
-            fontFamily: serif, fontSize: 19, fontWeight: 700,
-            color: T.black, margin: 0, lineHeight: 1.3,
-          }}>
-            {tournament.name}
-          </h3>
+      {/* Swipe labels */}
+      {swiping === "save" && (
+        <div style={{
+          position: "absolute", top: 28, left: 20, zIndex: 10,
+          background: T.green, color: T.white, borderRadius: 10,
+          padding: "6px 16px", fontSize: 18, fontWeight: 800,
+          border: "3px solid white", transform: "rotate(-12deg)",
+        }}>
+          SAVE
         </div>
+      )}
+      {swiping === "dismiss" && (
+        <div style={{
+          position: "absolute", top: 28, right: 20, zIndex: 10,
+          background: T.error, color: T.white, borderRadius: 10,
+          padding: "6px 16px", fontSize: 18, fontWeight: 800,
+          border: "3px solid white", transform: "rotate(12deg)",
+        }}>
+          SKIP
+        </div>
+      )}
+
+      {/* Hero image */}
+      <div style={{
+        height: "42%", flexShrink: 0, position: "relative",
+        background: `linear-gradient(135deg, ${T.green}, ${T.greenMid})`,
+        overflow: "hidden",
+      }}>
+        <img
+          src={imageUrl}
+          alt={tournament.course}
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+          onError={(e) => { e.currentTarget.style.display = "none"; }}
+        />
+        <div style={{
+          position: "absolute", bottom: 0, left: 0, right: 0,
+          background: "linear-gradient(transparent, rgba(0,0,0,0.45))",
+          padding: "32px 16px 10px",
+        }}>
+          {tournament.isCharity && (
+            <span style={{
+              background: "rgba(27,67,50,0.85)", color: T.white,
+              padding: "3px 10px", borderRadius: 20, fontSize: 12, fontWeight: 600,
+            }}>
+              Charity
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Info */}
+      <div style={{ flex: 1, padding: "16px 20px 8px", overflow: "hidden" }}>
+        <h3 style={{
+          fontFamily: serif, fontSize: 21, fontWeight: 700,
+          color: T.black, margin: "0 0 10px", lineHeight: 1.2,
+        }}>
+          {tournament.name}
+        </h3>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+          <Calendar size={14} color={T.green} />
+          <span style={{ fontSize: 14, fontWeight: 600, color: T.green }}>
+            {formatDate(tournament.date)} · {tournament.time}
+          </span>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+          <MapPin size={13} color={T.gray} />
+          <span style={{ fontSize: 13, color: T.gray }}>
+            {tournament.course} · {tournament.city}
+          </span>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <div style={{
+            background: T.goldLight, color: T.gold,
+            padding: "4px 12px", borderRadius: 8, fontSize: 15, fontWeight: 700,
+          }}>
+            {formatPrice(tournament.price)}
+          </div>
+          {tournament.singlesWelcome && (
+            <span style={{
+              background: "#EBF5FF", color: "#1D4ED8",
+              padding: "4px 10px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+            }}>
+              Singles OK
+            </span>
+          )}
+          {tournament.tags.slice(0, 2).map(tag => (
+            <span key={tag} style={{
+              background: T.bgGray, color: T.gray,
+              padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 500,
+            }}>
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Action buttons */}
+      <div style={{
+        display: "flex", justifyContent: "center", alignItems: "center",
+        gap: 20, padding: "12px 20px 20px",
+        borderTop: `1px solid ${T.bgGray}`,
+      }}>
+        <button
+          onClick={(e) => { e.stopPropagation(); onDismiss(tournament.id); }}
+          style={{
+            width: 52, height: 52, borderRadius: "50%",
+            background: "#FEF2F2", border: "2px solid #FECACA",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer",
+          }}
+        >
+          <X size={22} color={T.error} />
+        </button>
+        <button
+          onClick={(e) => { e.stopPropagation(); onTap(tournament); }}
+          style={{
+            padding: "10px 22px", borderRadius: 12,
+            background: T.cream, border: `1.5px solid ${T.lineGray}`,
+            fontSize: 14, fontWeight: 600, color: T.gray,
+            cursor: "pointer", fontFamily: sans,
+          }}
+        >
+          Details
+        </button>
         <button
           onClick={(e) => { e.stopPropagation(); onSave(tournament.id); }}
           style={{
-            background: "none", border: "none", cursor: "pointer",
-            padding: 4, color: isSaved ? T.green : T.grayLight,
+            width: 52, height: 52, borderRadius: "50%",
+            background: isSaved ? T.greenLight : "#F0FFF4",
+            border: `2px solid ${isSaved ? T.green : "#BBF7D0"}`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer",
           }}
         >
-          {isSaved ? <BookmarkCheck size={22} /> : <Bookmark size={22} />}
+          {isSaved ? <BookmarkCheck size={22} color={T.green} /> : <Bookmark size={22} color={T.green} />}
         </button>
-      </div>
-
-      <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          <Calendar size={14} color={T.green} />
-          <span style={{ fontSize: 15, fontWeight: 600, color: T.green }}>
-            {formatDate(tournament.date)}
-          </span>
-        </div>
-        <div style={{
-          background: T.goldLight, color: T.gold,
-          padding: "3px 10px", borderRadius: 8,
-          fontSize: 14, fontWeight: 700,
-        }}>
-          {formatPrice(tournament.price)}
-        </div>
-      </div>
-
-      <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 12 }}>
-        <MapPin size={13} color={T.gray} />
-        <span style={{ fontSize: 14, color: T.gray }}>
-          {tournament.course} · {tournament.city}
-        </span>
-      </div>
-
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-        {tournament.isCharity && (
-          <span style={{
-            background: T.greenLight, color: T.success,
-            padding: "3px 10px", borderRadius: 20, fontSize: 12, fontWeight: 600,
-          }}>
-            Charity
-          </span>
-        )}
-        {tournament.singlesWelcome && (
-          <span style={{
-            background: "#EBF5FF", color: "#1D4ED8",
-            padding: "3px 10px", borderRadius: 20, fontSize: 12, fontWeight: 600,
-          }}>
-            Singles OK
-          </span>
-        )}
-        {tournament.tags.slice(0, 2).map(tag => (
-          <span key={tag} style={{
-            background: T.bgGray, color: T.gray,
-            padding: "3px 10px", borderRadius: 20, fontSize: 12, fontWeight: 500,
-          }}>
-            {tag}
-          </span>
-        ))}
       </div>
     </div>
   );
@@ -904,85 +984,89 @@ export default function ScrambleApp() {
         )}
       </div>
 
-      <div style={{ flex: 1, overflow: "auto", padding: "0 20px" }}>
+      <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
         {tab === "feed" && (
           feedTournaments.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "48px 20px" }}>
-              <Search size={32} color={T.grayLight} style={{ marginBottom: 16, display: "block", margin: "0 auto 16px" }} />
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "48px 20px" }}>
+              <Search size={32} color={T.grayLight} style={{ marginBottom: 16 }} />
               <h3 style={{ fontFamily: serif, fontSize: 18, color: T.black, margin: "0 0 8px" }}>
                 No tournaments found
               </h3>
             </div>
           ) : (
-            <>
-              <p style={{ fontSize: 14, color: T.gray, margin: "8px 0 12px" }}>
-                {feedTournaments.length} tournaments found
-              </p>
-              {feedTournaments.map(t => (
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "4px 16px 12px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 13, color: T.gray, fontFamily: sans }}>
+                  {feedTournaments.length} remaining
+                </span>
+                <span style={{ fontSize: 13, color: T.grayLight, fontFamily: sans }}>
+                  Swipe or use buttons
+                </span>
+              </div>
+              <div style={{ flex: 1, position: "relative" }}>
                 <TournamentCard
-                  key={t.id}
-                  tournament={t}
-                  isSaved={savedIds.has(t.id)}
+                  key={feedTournaments[0].id}
+                  tournament={feedTournaments[0]}
+                  isSaved={savedIds.has(feedTournaments[0].id)}
                   onSave={handleSave}
                   onDismiss={handleDismiss}
                   onTap={setSelectedTournament}
                 />
-              ))}
-              <div style={{ paddingBottom: 40, textAlign: "center", color: T.grayLight, fontSize: 13 }}>
-                Swipe or tap to explore
               </div>
-            </>
+            </div>
           )
         )}
         {tab === "saved" && (
-          savedTournaments.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "48px 20px" }}>
-              <Bookmark size={32} color={T.grayLight} style={{ display: "block", margin: "0 auto 16px" }} />
-              <h3 style={{ fontFamily: serif, fontSize: 18, color: T.black, margin: "0 0 8px" }}>
-                Nothing saved yet
-              </h3>
-              <p style={{ fontSize: 14, color: T.gray }}>Tap the bookmark icon to save tournaments</p>
-            </div>
-          ) : (
-            <>
-              {savedTournaments.map(t => (
-                <div
-                  key={t.id}
-                  onClick={() => setSelectedTournament(t)}
-                  style={{
-                    background: T.white, borderRadius: 14, padding: 16,
-                    marginBottom: 10, cursor: "pointer",
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                  }}
-                >
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3 style={{ fontFamily: serif, fontSize: 17, fontWeight: 700, color: T.black, margin: "0 0 6px" }}>
-                      {t.name}
-                    </h3>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: T.green }}>
-                        {formatDate(t.date)}
-                      </span>
-                      <span style={{ fontSize: 14, color: T.gray }}>
-                        {t.course}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleSave(t.id); }}
+          <div style={{ flex: 1, overflow: "auto", padding: "0 20px" }}>
+            {savedTournaments.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "48px 20px" }}>
+                <Bookmark size={32} color={T.grayLight} style={{ display: "block", margin: "0 auto 16px" }} />
+                <h3 style={{ fontFamily: serif, fontSize: 18, color: T.black, margin: "0 0 8px" }}>
+                  Nothing saved yet
+                </h3>
+                <p style={{ fontSize: 14, color: T.gray }}>Tap the bookmark icon or swipe right to save</p>
+              </div>
+            ) : (
+              <>
+                {savedTournaments.map(t => (
+                  <div
+                    key={t.id}
+                    onClick={() => setSelectedTournament(t)}
                     style={{
-                      background: "none", border: "none", cursor: "pointer",
-                      padding: 4, color: T.green, flexShrink: 0,
+                      background: T.white, borderRadius: 14, padding: 16,
+                      marginBottom: 10, cursor: "pointer",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
                     }}
                   >
-                    <BookmarkCheck size={20} />
-                  </button>
-                </div>
-              ))}
-              <div style={{ paddingBottom: 40 }} />
-            </>
-          )
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <h3 style={{ fontFamily: serif, fontSize: 17, fontWeight: 700, color: T.black, margin: "0 0 6px" }}>
+                        {t.name}
+                      </h3>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: T.green }}>
+                          {formatDate(t.date)}
+                        </span>
+                        <span style={{ fontSize: 14, color: T.gray }}>
+                          {t.course}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleSave(t.id); }}
+                      style={{
+                        background: "none", border: "none", cursor: "pointer",
+                        padding: 4, color: T.green, flexShrink: 0,
+                      }}
+                    >
+                      <BookmarkCheck size={20} />
+                    </button>
+                  </div>
+                ))}
+                <div style={{ paddingBottom: 40 }} />
+              </>
+            )}
+          </div>
         )}
       </div>
 
