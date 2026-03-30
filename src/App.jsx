@@ -406,43 +406,62 @@ function Onboarding({ onComplete }) {
   );
 }
 
-function TournamentCard({ tournament, isSaved, onSave, onDismiss, onTap }) {
+function TournamentCard({ tournament, isSaved, onSave, onSwipeSave, onDismiss, onTap }) {
   const [offset, setOffset] = useState(0);
   const [swiping, setSwiping] = useState(null);
   const [released, setReleased] = useState(true);
   const startX = useRef(0);
-  const dragged = useRef(false);
+  const startY = useRef(0);
+  const swipeMode = useRef(null); // null | "horizontal" | "vertical"
   const cardRef = useRef(null);
 
   const imageUrl = `https://picsum.photos/seed/golf${tournament.id}/800/500`;
 
   const handlePointerDown = (e) => {
-    cardRef.current?.setPointerCapture(e.pointerId);
     startX.current = e.clientX;
-    dragged.current = false;
+    startY.current = e.clientY;
+    swipeMode.current = null;
     setReleased(false);
   };
 
   const handlePointerMove = (e) => {
     const dx = e.clientX - startX.current;
-    if (Math.abs(dx) > 6) dragged.current = true;
+    const dy = e.clientY - startY.current;
+
+    // Determine direction on first significant movement
+    if (swipeMode.current === null) {
+      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+        swipeMode.current = Math.abs(dx) >= Math.abs(dy) ? "horizontal" : "vertical";
+        if (swipeMode.current === "horizontal") {
+          cardRef.current?.setPointerCapture(e.pointerId);
+        }
+      }
+      return;
+    }
+
+    if (swipeMode.current !== "horizontal") return;
+
     setOffset(dx);
     setSwiping(dx > 40 ? "save" : dx < -40 ? "dismiss" : null);
   };
 
   const handlePointerUp = () => {
     setReleased(true);
-    if (offset > 100) {
-      setOffset(600);
-      setTimeout(() => { onSave(tournament.id); setOffset(0); setSwiping(null); }, 220);
-    } else if (offset < -100) {
-      setOffset(-600);
-      setTimeout(() => { onDismiss(tournament.id); setOffset(0); setSwiping(null); }, 220);
-    } else {
-      setOffset(0);
-      setSwiping(null);
-      if (!dragged.current) onTap(tournament);
+    if (swipeMode.current === "horizontal") {
+      if (offset > 100) {
+        setOffset(600);
+        setTimeout(() => { onSwipeSave(tournament.id); setOffset(0); setSwiping(null); }, 220);
+      } else if (offset < -100) {
+        setOffset(-600);
+        setTimeout(() => { onDismiss(tournament.id); setOffset(0); setSwiping(null); }, 220);
+      } else {
+        setOffset(0);
+        setSwiping(null);
+      }
+    } else if (swipeMode.current === null) {
+      onTap(tournament);
     }
+    swipeMode.current = null;
   };
 
   const rotation = offset * 0.05;
@@ -463,7 +482,7 @@ function TournamentCard({ tournament, isSaved, onSave, onDismiss, onTap }) {
         transition: released ? "transform 0.25s ease" : "none",
         boxShadow: "0 8px 32px rgba(0,0,0,0.14)",
         userSelect: "none",
-        touchAction: "none",
+        touchAction: "pan-y",
         display: "flex",
         flexDirection: "column",
       }}
@@ -914,6 +933,11 @@ export default function ScrambleApp() {
     setDismissedIds(prev => new Set(prev).add(id));
   }, []);
 
+  const handleSaveFromFeed = useCallback((id) => {
+    setSavedIds(prev => { const next = new Set(prev); next.add(id); return next; });
+    setDismissedIds(prev => new Set(prev).add(id));
+  }, []);
+
   if (!onboarded) {
     return (
       <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
@@ -994,25 +1018,19 @@ export default function ScrambleApp() {
               </h3>
             </div>
           ) : (
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "4px 16px 12px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                <span style={{ fontSize: 13, color: T.gray, fontFamily: sans }}>
-                  {feedTournaments.length} remaining
-                </span>
-                <span style={{ fontSize: 13, color: T.grayLight, fontFamily: sans }}>
-                  Swipe or use buttons
-                </span>
-              </div>
-              <div style={{ flex: 1, position: "relative" }}>
-                <TournamentCard
-                  key={feedTournaments[0].id}
-                  tournament={feedTournaments[0]}
-                  isSaved={savedIds.has(feedTournaments[0].id)}
-                  onSave={handleSave}
-                  onDismiss={handleDismiss}
-                  onTap={setSelectedTournament}
-                />
-              </div>
+            <div style={{ flex: 1, overflow: "auto", padding: "4px 16px 16px" }}>
+              {feedTournaments.map(t => (
+                <div key={t.id} style={{ height: "82vh", flexShrink: 0, marginBottom: 12, position: "relative" }}>
+                  <TournamentCard
+                    tournament={t}
+                    isSaved={savedIds.has(t.id)}
+                    onSave={handleSave}
+                    onSwipeSave={handleSaveFromFeed}
+                    onDismiss={handleDismiss}
+                    onTap={setSelectedTournament}
+                  />
+                </div>
+              ))}
             </div>
           )
         )}
