@@ -6,8 +6,7 @@
   <title>Dejargonator — Your jargon. Translated.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -34,23 +33,19 @@
     }
 
     .app-name {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(2.6rem, 7.5vw, 4.2rem);
-      font-weight: 800;
-      letter-spacing: -0.04em;
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(2.8rem, 8vw, 4.6rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
       line-height: 1;
-      margin-bottom: 12px;
+      text-align: center;
+      width: 100%;
+      display: block;
     }
 
     .app-name .accent {
       color: var(--dialect-accent);
       transition: color 0.35s ease;
-    }
-
-    .app-tagline {
-      font-size: 1rem;
-      color: #777;
-      font-style: italic;
     }
 
     /* ── Container ──────────────────────────────────────────────────────── */
@@ -62,9 +57,9 @@
 
     /* ── Section labels ──────────────────────────────────────────────────── */
     .section-label {
-      font-family: 'Syne', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 0.75rem;
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.1em;
       color: #999;
@@ -87,8 +82,9 @@
       outline: none;
       transition: border-color 0.2s;
       color: #1a1a1a;
-      -webkit-appearance: none;
-      appearance: none;
+      resize: none;
+      min-height: 110px;
+      line-height: 1.55;
     }
 
     #jargon-input::placeholder { color: #bbb; }
@@ -198,9 +194,9 @@
       display: block;
       width: 100%;
       padding: 16px;
-      font-family: 'Syne', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
       background: #1a1a1a;
       color: #fff;
       border: none;
@@ -217,9 +213,7 @@
       box-shadow: 0 6px 22px rgba(0,0,0,0.13);
     }
 
-    #translate-btn:active:not(:disabled) {
-      transform: translateY(0);
-    }
+    #translate-btn:active:not(:disabled) { transform: translateY(0); }
 
     #translate-btn:disabled {
       opacity: 0.4;
@@ -286,17 +280,17 @@
     }
 
     .output-text {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(1.15rem, 3.5vw, 1.6rem);
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(1.15rem, 3.5vw, 1.55rem);
       font-weight: 700;
       line-height: 1.45;
       color: #1a1a1a;
     }
 
-    .output-actions { display: flex; gap: 10px; }
+    .output-actions { display: flex; }
 
-    .action-btn {
-      flex: 1;
+    #copy-btn {
+      width: 100%;
       padding: 12px;
       font-family: 'Inter', sans-serif;
       font-size: 0.88rem;
@@ -309,7 +303,7 @@
       color: #333;
     }
 
-    .action-btn:hover {
+    #copy-btn:hover {
       border-color: var(--dialect-accent);
       background: var(--dialect-bg);
     }
@@ -377,56 +371,6 @@
 
     #retry-btn:hover { background: #b91c1c; }
 
-    /* ── Share card (off-screen, for html2canvas) ─────────────────────────── */
-    #share-card {
-      position: fixed;
-      top: 0;
-      left: -9999px;
-      width: 1080px;
-      height: 1080px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 80px 100px;
-      font-family: 'Syne', sans-serif;
-      overflow: hidden;
-    }
-
-    .sc-emoji {
-      font-size: 108px;
-      line-height: 1;
-      margin-bottom: 28px;
-    }
-
-    .sc-dialect {
-      font-size: 33px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      opacity: 0.6;
-      margin-bottom: 44px;
-    }
-
-    .sc-text {
-      font-size: 66px;
-      font-weight: 800;
-      text-align: center;
-      line-height: 1.28;
-      max-width: 900px;
-      word-break: break-word;
-    }
-
-    .sc-watermark {
-      position: absolute;
-      bottom: 62px;
-      font-size: 27px;
-      font-weight: 700;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      opacity: 0.28;
-    }
-
     /* ── Animations ───────────────────────────────────────────────────────── */
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
@@ -448,10 +392,7 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── Dialect flash highlight ──────────────────────────────────────────── */
-    .dialect-grid.flash {
-      animation: flash-grid 0.5s ease;
-    }
+    .dialect-grid.flash { animation: flash-grid 0.5s ease; }
 
     @keyframes flash-grid {
       0%, 100% { outline: none; }
@@ -463,7 +404,6 @@
 
   <header>
     <h1 class="app-name">Dejar<span class="accent">gon</span>ator</h1>
-    <p class="app-tagline">Because "synergize" isn't a real word.</p>
   </header>
 
   <main class="container">
@@ -478,18 +418,17 @@
 
     <!-- Input -->
     <section class="input-section">
-      <p class="section-label">Your corporate word salad</p>
+      <p class="section-label">Paste your email, post, or whatever</p>
       <div class="input-wrapper">
-        <input
+        <textarea
           id="jargon-input"
-          type="text"
-          maxlength="80"
+          maxlength="200"
           autocomplete="off"
           spellcheck="false"
-          placeholder="Paste your corporate word salad here..."
-        />
+          placeholder="Paste your email, LinkedIn post, comment — anything that needs translating..."
+        ></textarea>
       </div>
-      <div class="char-count" id="char-count">0 / 80</div>
+      <div class="char-count" id="char-count">0 / 200</div>
 
       <div class="examples-row">
         <p class="examples-hint">Try an example →</p>
@@ -519,8 +458,7 @@
         <div class="output-text" id="output-text"></div>
       </div>
       <div class="output-actions">
-        <button class="action-btn" id="copy-btn">📋 Copy</button>
-        <button class="action-btn" id="save-btn">🖼 Save Image</button>
+        <button id="copy-btn">📋 Copy</button>
       </div>
     </section>
 
@@ -531,14 +469,6 @@
     </div>
 
   </main>
-
-  <!-- Share card — off-screen, rendered to PNG via html2canvas -->
-  <div id="share-card">
-    <span class="sc-emoji"  id="sc-emoji"></span>
-    <span class="sc-dialect" id="sc-dialect"></span>
-    <p    class="sc-text"    id="sc-text"></p>
-    <span class="sc-watermark">Dejargonator</span>
-  </div>
 
   <script>
     // ─── API KEY ──────────────────────────────────────────────────────────────
@@ -552,44 +482,44 @@
         emoji: '🌸',
         name: 'Southern Belle',
         colors: { primary: '#F2A7BB', bg: '#FDF6EC', accent: '#C9A84C', text: '#4a2600' },
-        prompt: `You are a Southern Belle from Georgia, warm as a summer afternoon on the porch. Translate the corporate jargon given to you into your most charming, drawl-soaked dialect. Use expressions like "bless your heart", "well I never", "sugar", "honey", and "y'all". Keep it to 1–2 sentences. Output only the translation — nothing else.`
+        prompt: `You are a Southern Belle from Georgia, warm as a summer afternoon on the porch. Translate the text given to you into your most charming, drawl-soaked dialect. Use expressions like "bless your heart", "well I never", "sugar", "honey", and "y'all". Keep it to 1–2 sentences. Output only the translation — nothing else.`
       },
       newYorker: {
         emoji: '🗽',
         name: 'New Yorker',
         colors: { primary: '#4A4A4A', bg: '#F7F7F7', accent: '#F5C518', text: '#111' },
-        prompt: `You are an impatient New Yorker who has zero time for corporate nonsense. Translate the jargon into blunt, direct New York speak — no fluff, maybe a little sarcastic, definitely no-nonsense. 1–2 sentences max. Output only the translation — nothing else.`
+        prompt: `You are an impatient New Yorker who has zero time for nonsense. Translate the text into blunt, direct New York speak — no fluff, maybe a little sarcastic, definitely no-nonsense. 1–2 sentences max. Output only the translation — nothing else.`
       },
       caliSurfer: {
         emoji: '🤙',
         name: 'Cali Surfer',
         colors: { primary: '#2E86AB', bg: '#EEF9FF', accent: '#FF6B6B', text: '#0d2a36' },
-        prompt: `You are a totally chill California surfer dude. Translate the corporate jargon into breezy surfer speak. Use words like "stoked", "gnarly", "vibe", "dude", "totally", "rad", "hang loose", "cowabunga". 1–2 sentences max. Output only the translation — nothing else.`
+        prompt: `You are a totally chill California surfer dude. Translate the text into breezy surfer speak. Use words like "stoked", "gnarly", "vibe", "dude", "totally", "rad", "hang loose", "cowabunga". 1–2 sentences max. Output only the translation — nothing else.`
       },
       toddler: {
         emoji: '🧒',
         name: 'Toddler',
         colors: { primary: '#E63946', bg: '#FFFDE8', accent: '#A8DADC', text: '#1a1a1a' },
-        prompt: `You are a 3-year-old toddler. Translate the corporate jargon the way a toddler would say it: very short sentences, simple words, lots of "why?", "mine!", "no!", chaotic energy. 2–3 short sentences max. Output only the translation — nothing else.`
+        prompt: `You are a 3-year-old toddler. Translate the text the way a toddler would say it: very short sentences, simple words, lots of "why?", "mine!", "no!", chaotic energy. 2–3 short sentences max. Output only the translation — nothing else.`
       },
       oldWest: {
         emoji: '🤠',
         name: 'Old West',
         colors: { primary: '#8B5E3C', bg: '#FDF3E3', accent: '#D4A96A', text: '#1e0e00' },
-        prompt: `You are a weathered cowboy from the Old West. Translate the corporate jargon into dusty frontier speak. Use "pardner", "reckon", "ain't", "yonder", "varmint", trail metaphors, and frontier justice energy. 1–2 sentences max. Output only the translation — nothing else.`
+        prompt: `You are a weathered cowboy from the Old West. Translate the text into dusty frontier speak. Use "pardner", "reckon", "ain't", "yonder", "varmint", trail metaphors, and frontier justice energy. 1–2 sentences max. Output only the translation — nothing else.`
       },
       genZ: {
         emoji: '💅',
         name: 'Gen Z',
         colors: { primary: '#9B5DE5', bg: '#FAF0FF', accent: '#F15BB5', text: '#1a0028' },
-        prompt: `You are a Gen Z person who communicates entirely in current slang. Translate the corporate jargon into Gen Z speak. Use "no cap", "slay", "it's giving", "fr fr", "lowkey", "bussin", "understood the assignment", "rent free", "main character energy", "era". 1–2 sentences max. Output only the translation — nothing else.`
+        prompt: `You are a Gen Z person who communicates entirely in current slang. Translate the text into Gen Z speak. Use "no cap", "slay", "it's giving", "fr fr", "lowkey", "bussin", "understood the assignment", "rent free", "main character energy", "era". 1–2 sentences max. Output only the translation — nothing else.`
       }
     };
 
     const EXAMPLES = [
-      'Leverage synergies to drive stakeholder value',
-      'Our solution delivers best-in-class ROI',
-      "We're disrupting the paradigm shift"
+      'Hope this finds you well — just circling back to align on next steps',
+      'Excited to share some thoughts on synergizing our go-to-market strategy',
+      'Per my last email, we need to action this before EOD to move the needle'
     ];
 
     const LOADING_MESSAGES = [
@@ -602,27 +532,26 @@
     ];
 
     // ─── STATE ────────────────────────────────────────────────────────────────
-    let selectedDialect  = null;
-    let lastTranslation  = '';
-    let isLoading        = false;
+    let selectedDialect = null;
+    let lastTranslation = '';
+    let isLoading       = false;
 
     // ─── DOM REFS ─────────────────────────────────────────────────────────────
-    const input          = document.getElementById('jargon-input');
-    const charCount      = document.getElementById('char-count');
-    const dialectGrid    = document.getElementById('dialect-grid');
-    const exampleChips   = document.getElementById('example-chips');
-    const translateBtn   = document.getElementById('translate-btn');
-    const loadingState   = document.getElementById('loading-state');
-    const loadingMsg     = document.getElementById('loading-msg');
-    const outputSection  = document.getElementById('output-section');
-    const outputTag      = document.getElementById('output-dialect-tag');
-    const outputText     = document.getElementById('output-text');
-    const copyBtn        = document.getElementById('copy-btn');
-    const saveBtn        = document.getElementById('save-btn');
-    const errorSection   = document.getElementById('error-section');
-    const errorMsg       = document.getElementById('error-msg');
-    const retryBtn       = document.getElementById('retry-btn');
-    const apikeyNotice   = document.getElementById('apikey-notice');
+    const input         = document.getElementById('jargon-input');
+    const charCount     = document.getElementById('char-count');
+    const dialectGrid   = document.getElementById('dialect-grid');
+    const exampleChips  = document.getElementById('example-chips');
+    const translateBtn  = document.getElementById('translate-btn');
+    const loadingState  = document.getElementById('loading-state');
+    const loadingMsg    = document.getElementById('loading-msg');
+    const outputSection = document.getElementById('output-section');
+    const outputTag     = document.getElementById('output-dialect-tag');
+    const outputText    = document.getElementById('output-text');
+    const copyBtn       = document.getElementById('copy-btn');
+    const errorSection  = document.getElementById('error-section');
+    const errorMsg      = document.getElementById('error-msg');
+    const retryBtn      = document.getElementById('retry-btn');
+    const apikeyNotice  = document.getElementById('apikey-notice');
 
     // ─── INIT ─────────────────────────────────────────────────────────────────
     function init() {
@@ -652,7 +581,6 @@
       input.addEventListener('input', () => { updateCharCount(); checkReadiness(); });
       translateBtn.addEventListener('click', handleTranslate);
       copyBtn.addEventListener('click', handleCopy);
-      saveBtn.addEventListener('click', handleSaveImage);
       retryBtn.addEventListener('click', callClaude);
     }
 
@@ -681,8 +609,8 @@
     // ─── CHAR COUNT ───────────────────────────────────────────────────────────
     function updateCharCount() {
       const len = input.value.length;
-      charCount.textContent = `${len} / 80`;
-      charCount.className = 'char-count' + (len >= 80 ? ' full' : len >= 65 ? ' near' : '');
+      charCount.textContent = `${len} / 200`;
+      charCount.className = 'char-count' + (len >= 200 ? ' full' : len >= 170 ? ' near' : '');
     }
 
     // ─── READINESS ───────────────────────────────────────────────────────────
@@ -738,7 +666,7 @@
           },
           body: JSON.stringify({
             model: 'claude-haiku-4-5',
-            max_tokens: 150,
+            max_tokens: 250,
             system: DIALECTS[selectedDialect].prompt,
             messages: [{ role: 'user', content: input.value.trim() }]
           })
@@ -795,7 +723,6 @@
       try {
         await navigator.clipboard.writeText(lastTranslation);
       } catch {
-        // Fallback for non-HTTPS or restricted environments
         const ta = Object.assign(document.createElement('textarea'), {
           value: lastTranslation,
           style: 'position:fixed;left:-9999px;'
@@ -811,70 +738,6 @@
         copyBtn.textContent = '📋 Copy';
         copyBtn.classList.remove('copied');
       }, 2200);
-    }
-
-    // ─── SAVE IMAGE ───────────────────────────────────────────────────────────
-    async function handleSaveImage() {
-      if (!lastTranslation || saveBtn.dataset.saving) return;
-
-      saveBtn.dataset.saving = '1';
-      saveBtn.textContent = '⏳ Generating...';
-
-      const d = DIALECTS[selectedDialect];
-      const card = document.getElementById('share-card');
-
-      // Populate share card content
-      document.getElementById('sc-emoji').textContent   = d.emoji;
-      document.getElementById('sc-dialect').textContent = d.name;
-      const scText = document.getElementById('sc-text');
-      scText.textContent       = lastTranslation;
-      scText.style.color       = d.colors.text;
-      document.getElementById('sc-dialect').style.color = d.colors.primary;
-      card.style.background    = `linear-gradient(145deg, ${d.colors.bg} 0%, ${hexAlpha(d.colors.primary, 0.32)} 100%)`;
-
-      // Temporarily move card into viewport for html2canvas
-      card.style.left    = '0';
-      card.style.zIndex  = '9999';
-      card.style.opacity = '0';
-      card.style.pointerEvents = 'none';
-
-      // Let layout settle
-      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-
-      try {
-        const canvas = await html2canvas(card, {
-          width:  1080,
-          height: 1080,
-          scale:  1,
-          useCORS: true,
-          allowTaint: true,
-          logging: false
-        });
-
-        const link = document.createElement('a');
-        link.download = `dejargonator-${selectedDialect}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-      } catch {
-        alert('Image generation failed — try again.');
-      }
-
-      // Restore off-screen position
-      card.style.left          = '-9999px';
-      card.style.zIndex        = '';
-      card.style.opacity       = '';
-      card.style.pointerEvents = '';
-
-      delete saveBtn.dataset.saving;
-      saveBtn.textContent = '🖼 Save Image';
-    }
-
-    // ─── UTIL ─────────────────────────────────────────────────────────────────
-    function hexAlpha(hex, a) {
-      const r = parseInt(hex.slice(1, 3), 16);
-      const g = parseInt(hex.slice(3, 5), 16);
-      const b = parseInt(hex.slice(5, 7), 16);
-      return `rgba(${r},${g},${b},${a})`;
     }
 
     // ─── GO ───────────────────────────────────────────────────────────────────
